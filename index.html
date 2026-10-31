@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b1020">
+  <meta name="description" content="A demo-only market analysis and trading simulator.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+  <title>QX Terminal — Analysis & Demo</title>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><div class="brandmark">QX</div><div><strong>QX TERMINAL</strong><small>ANALYSIS • DEMO ONLY</small></div></div>
+  <div class="status"><span class="dot"></span><span id="connectionText">LOCAL DEMO DATA</span></div>
+</header>
+<main class="shell">
+  <section class="hero">
+    <div><p class="eyebrow">MARKET WORKSPACE</p><h1>Analysis terminal</h1><p class="muted">Research signals. Simulate outcomes. Never places real trades.</p></div>
+    <div class="demo-chip">● DEMO MODE</div>
+  </section>
+
+  <section class="toolbar panel">
+    <label>Asset
+      <select id="asset">
+        <option>EUR/USD</option><option>GBP/USD</option><option>USD/JPY</option><option>BTC/USD</option><option>GOLD</option><option>OTC — sample only</option>
+      </select>
+    </label>
+    <label>Timeframe
+      <select id="timeframe"><option value="1">1 minute</option><option value="5">5 minutes</option><option value="15">15 minutes</option><option value="60">1 hour</option></select>
+    </label>
+    <label>Data
+      <select id="dataMode"><option value="demo">Built-in demo candles</option><option value="csv">Import CSV</option><option value="api">Custom public JSON API</option></select>
+    </label>
+    <button class="primary" id="refreshBtn">Refresh analysis</button>
+  </section>
+
+  <section class="grid two">
+    <article class="panel chart-panel">
+      <div class="panel-head"><div><p class="eyebrow">PRICE ACTION</p><h2 id="chartTitle">EUR/USD · 1m</h2></div><span class="tag" id="dataTag">SYNTHETIC DATA</span></div>
+      <div class="chart-stats"><div><small>LAST CLOSE</small><strong id="lastPrice">—</strong></div><div><small>CHANGE</small><strong id="changeValue">—</strong></div><div><small>CANDLES</small><strong id="candleCount">—</strong></div></div>
+      <canvas id="chart" height="230" aria-label="Candlestick chart"></canvas>
+      <div class="legend"><span><i class="up"></i>Bullish</span><span><i class="down"></i>Bearish</span><span><i class="bb"></i>BB range</span></div>
+    </article>
+    <article class="panel signal-panel">
+      <div class="panel-head"><div><p class="eyebrow">DECISION ENGINE</p><h2>Signal assessment</h2></div><span class="tag">EXPERIMENTAL</span></div>
+      <div class="signal-result neutral" id="signalResult"><span id="signalLabel">NO TRADE</span><small id="signalReason">Waiting for analysis</small></div>
+      <div class="score-row"><span>Agreement score</span><strong id="score">—</strong></div>
+      <div class="meter"><span id="meterFill"></span></div>
+      <p class="tiny">Score measures rule agreement, not probability of winning.</p>
+      <div class="metric-list" id="metricList"></div>
+    </article>
+  </section>
+
+  <section class="grid two">
+    <article class="panel">
+      <div class="panel-head"><div><p class="eyebrow">SIMULATION</p><h2>Demo position</h2></div><span class="tag purple">NO REAL MONEY</span></div>
+      <div class="sim-controls">
+        <label>Demo stake (points)<input id="stake" type="number" min="1" max="1000" value="10"></label>
+        <label>Illustrative payout %<input id="payout" type="number" min="1" max="99" value="80"></label>
+        <label>Expiry (candles)<select id="expiry"><option value="1">1 candle</option><option value="2">2 candles</option><option value="3">3 candles</option></select></label>
+      </div>
+      <div class="button-row"><button id="callBtn" class="bull">Simulate CALL</button><button id="putBtn" class="bear">Simulate PUT</button></div>
+      <button id="autoBtn" class="secondary full">Run one rule-based demo simulation</button>
+      <p class="tiny" id="simMessage">Simulation uses the next available candle in the dataset. It does not connect to Quotex.</p>
+      <div class="balance"><span>Demo balance</span><strong id="balance">1,000.00 pts</strong></div>
+    </article>
+    <article class="panel">
+      <div class="panel-head"><div><p class="eyebrow">PERFORMANCE</p><h2>Demo journal</h2></div><button id="resetBtn" class="text-btn">Reset</button></div>
+      <div class="stats-grid"><div><small>TRADES</small><strong id="trades">0</strong></div><div><small>WINS</small><strong id="wins">0</strong></div><div><small>LOSSES</small><strong id="losses">0</strong></div><div><small>WIN RATE</small><strong id="winRate">—</strong></div></div>
+      <div class="journal" id="journal"><p class="empty">No demo positions yet.</p></div>
+    </article>
+  </section>
+
+  <section class="panel data-panel">
+    <div class="panel-head"><div><p class="eyebrow">DATA CONNECTION</p><h2>Bring your own permitted data</h2></div><span class="tag">NO API KEY INCLUDED</span></div>
+    <div id="csvControls" class="data-controls hidden"><p class="muted">Upload a CSV with columns: <code>time,open,high,low,close</code>. Volume is optional.</p><input type="file" id="csvFile" accept=".csv,text/csv"></div>
+    <div id="apiControls" class="data-controls hidden">
+      <p class="muted">Enter a public endpoint you are authorized to use. It must allow browser CORS and return JSON as an array of candles, each with <code>time, open, high, low, close</code>. No Quotex login, private endpoint, or OTC feed is accessed.</p>
+      <input id="apiUrl" type="url" placeholder="https://your-permitted-provider.example/candles">
+      <button id="loadApi" class="secondary">Load endpoint</button>
+    </div>
+    <div class="notice"><strong>Important data limitation:</strong> this app starts with generated sample candles. It does not contain a verified free live-feed provider. OTC prices are platform-specific; do not assume public-market prices match Quotex OTC quotes. A public endpoint is not guaranteed to provide OTC data or one-minute candles.</div>
+  </section>
+  <footer>QX Terminal · Independent educational simulator · Not affiliated with Quotex · No financial advice</footer>
+</main>
+<script src="app.js"></script>
+</body>
+</html>
